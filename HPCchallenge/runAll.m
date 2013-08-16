@@ -11,7 +11,7 @@ function bench_results = runAll(num_workers)
 %% Initialize
 
 % The Distributed FFT Benchmark and RandomAccess Benchmark requires that number of workers must be powers of 2
-assert(isinteger(sqrt(num_workers)),'number of workers must be powers of 2')
+validateattributes(log2(num_workers),{'numeric'},{'integer'},'runAll','log2(num_workers)')
 
 MemoryPerWorker_inGB = 0.01; % we determine problem size by fixing memory utilization per worker
 bench_results = [];
