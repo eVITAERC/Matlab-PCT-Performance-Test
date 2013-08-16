@@ -9,9 +9,10 @@ function bench_results = runAll(num_workers,memoryPerWorker_inGB,benchmarkSet)
 %                           (default: 0.5)
 %   benchmarkSet            a cell-array containing one or more of the following stings, indicating
 %                           which benchmarks are to be run (default to running all):
-%                           'fft':       Distributed FFT
-%                           'hpl':       High-performance Linpack
-%                           'stream':   EP Stream (Triad)
+%                           'fft':      Distributed FFT
+%                           'hpl':      Global-HighPerformanceLinpack
+%                           'ptrans':   Global-Ptrans (matrix transpose)
+%                           'stream':   EP Stream (triad operation a+b*c)
 %                           'ra':       Global-RandomAccess
 %   
 %   # OUTPUTS
@@ -23,16 +24,15 @@ function bench_results = runAll(num_workers,memoryPerWorker_inGB,benchmarkSet)
 
 %% === Initialize
 
+% defaults
 if not(exist('num_workers','var'))
     num_workers = 1;
 end
-
 if not(exist('memoryPerWorker_inGB','var'))
     memoryPerWorker_inGB = 0.5;
 end
-
 if not(exist('benchmarkSet','var'))
-    benchmarkSet = {'fft','hpl','stream','ra'};
+    benchmarkSet = {'fft','hpl','ptrans','stream','ra'};
 end
 
 % guard against lazy use of simply typing in the benchmark you want
@@ -49,6 +49,13 @@ validateattributes(log2(num_workers),{'numeric'},{'integer'},'runAll','log2(num_
 
 %% === Start Benchmarks
 
+% EP STREAM (Triad)
+if ismember('stream',benchmarkSet)
+    disp('running hpccStream...')
+    problemSize_Stream = hpccGetProblemSize('stream',num_workers,memoryPerWorker_inGB);
+    hpccStream(problemSize_Stream);
+end
+
 % Distributed FFT
 if ismember('fft',benchmarkSet)
     disp('running hpccFft...')
@@ -56,18 +63,18 @@ if ismember('fft',benchmarkSet)
     hpccFft(problemSize_FFT);
 end
 
-% Linpack
+% Global Linpack
 if ismember('hpl',benchmarkSet)
     disp('running hpccLinpack...')
     problemSize_Linpack = hpccGetProblemSize('hpl',num_workers,memoryPerWorker_inGB);
     hpccLinpack(problemSize_Linpack);
 end
 
-% EP STREAM (Triad)
-if ismember('stream',benchmarkSet)
-    disp('running hpccStream...')
-    problemSize_Stream = hpccGetProblemSize('stream',num_workers,memoryPerWorker_inGB);
-    hpccStream(problemSize_Stream);
+% Global Ptrans
+if ismember('ptrans',benchmarkSet)
+    disp('running hpccPtrans...')
+    problemSize_Ptrans = hpccGetProblemSize('hpl',num_workers,memoryPerWorker_inGB);
+    hpccPtrans(problemSize_Ptrans);
 end
 
 % Global RandomAccess
