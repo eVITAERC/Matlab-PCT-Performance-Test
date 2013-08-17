@@ -50,9 +50,9 @@ switch lower(benchmark)
         % Matrix size (8*N^2) > 1/2 system memory
         N = fix(sqrt(totalMem / 2.3 / 8));
 	case 'ptrans'
-		% Need to accomodate two random matrices plus overhead for the transpose
-		% Matrix size (8*N^2) > 1/4 system memory
-		N = fix(sqrt(totalMem / 3.5 / 8));
+		% Need to accomodate two random matrices plus 3x overhead for the transpose
+		% Matrix size (8*N^2) > 1/5 system memory
+		N = fix(sqrt(totalMem / 5.5 / 8));
     case 'ra'
         % Table size (8*M bytes) > 1/4 of system memory
         N = fix(totalMem / 4 / 8);
