@@ -9,7 +9,7 @@ function hpccPtrans( m )
 %    acceptable bounds.
 %
 %    If you do not specify m, the default value is that returned from
-%    hpccGetProblemSize('hpl'), which assumes that each process in the pool
+%    hpccGetProblemSize('ptrans'), which assumes that each process in the pool
 %    has 256 MB of memory available. This is expected to be smaller than
 %    the actual memory available. 
 %
@@ -19,11 +19,13 @@ function hpccPtrans( m )
 %    www.hpcchallenge.org/class2specs.pdf.)
 %
 
-%   Copyright 2008-2009 The MathWorks, Inc.
+%   Derived from 'hpccLinpack.m'
+%   Created by Tim Lin on 2013-08-16.
+%   Copyright (c) 2013 SLIM. All rights reserved.
 
 % If no size provided then get a default size
 if nargin < 1
-    m = hpccGetProblemSize( 'hpl' );
+    m = hpccGetProblemSize( 'ptrans' );
 end
 
 spmd

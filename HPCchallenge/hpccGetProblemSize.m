@@ -9,6 +9,7 @@ function N = hpccGetProblemSize(benchmark, nLabs, GBperLab)
 %        'ra'       Random Access benchmark 
 %        'fft'      FFT benchmark 
 %        'stream'   Stream benchmark
+%		 'ptrans'	PTrans benchmark
 %
 %    For a particular problem, number of communicating processes involved
 %    with the solution, and amount of memory available to each of those
@@ -27,6 +28,7 @@ function N = hpccGetProblemSize(benchmark, nLabs, GBperLab)
 %  See also:  hpccFft, hpccLinpack, hpccRandomAccess, hpccStream
 
 %   Copyright 2008-2009 The MathWorks, Inc.
+% 	Modified 2013 Tim Lin, SLIM, University of British Columbia
 
 if nargin < 2
     % If no pool open then nLabs = 1 and we run locally
@@ -47,6 +49,10 @@ switch lower(benchmark)
         %
         % Matrix size (8*N^2) > 1/2 system memory
         N = fix(sqrt(totalMem / 2.3 / 8));
+	case 'ptrans'
+		% Need to accomodate two random matrices plus overhead for the transpose
+		% Matrix size (8*N^2) > 1/4 system memory
+		N = fix(sqrt(totalMem / 3.5 / 8));
     case 'ra'
         % Table size (8*M bytes) > 1/4 of system memory
         N = fix(totalMem / 4 / 8);

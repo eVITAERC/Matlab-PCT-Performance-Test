@@ -73,7 +73,7 @@ end
 % Global Ptrans
 if ismember('ptrans',benchmarkSet)
     disp('running hpccPtrans...')
-    problemSize_Ptrans = hpccGetProblemSize('hpl',num_workers,memoryPerWorker_inGB);
+    problemSize_Ptrans = hpccGetProblemSize('ptrans',num_workers,memoryPerWorker_inGB);
     hpccPtrans(problemSize_Ptrans);
 end
 
