@@ -32,17 +32,18 @@ spmd
     % Create two distributed matrix in the default 1d distribution
     A = codistributed.randn(m, m);
     B = codistributed.randn(m, m);
+    C = codistributed.randn(m, m);
     
-    % Do the transpose twice and get the average
+    % Time the mat-add
+    tic
+    A = A + B;
+    t_madd = toc;
+    
+    % Time the transpose and subtract the mat-add time
     tic
     A = transpose(A) + B;
-    t1 = toc;
-    
-    tic
-    A = transpose(A) + B;
-    t2 = toc;
-    
-    t = (t1+t2)/2;
+    t = toc;
+    t = t - t_madd;
 end
 
 % Performance in effective transfer rate of gigabytes/s
