@@ -33,10 +33,16 @@ spmd
     A = codistributed.randn(m, m);
     B = codistributed.randn(m, m);
     
-    % Time the solution of the linear system   
+    % Do the transpose twice and get the average
     tic
     A = transpose(A) + B;
-    t = toc;
+    t1 = toc;
+    
+    tic
+    A = transpose(A) + B;
+    t2 = toc;
+    
+    t = (t1+t2)/2;
 end
 
 % Performance in effective transfer rate of gigabytes/s
