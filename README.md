@@ -4,10 +4,9 @@ This package provides a set of standalone benchmarks for high-performance comput
 
 The benchmarks are partitioned into different directories according to their purpose:
 
-HPCchallenge
-: includes a modified set of [HPCC benchmarks](http://www.hpcchallenge.org/) implemented by Mathworks and included as demos in the Matlab PCT distribution
+- `HPCchallenge`: includes a modified set of [HPCC benchmarks](http://www.hpcchallenge.org/) implemented by Mathworks and included as demos in the Matlab PCT distribution
 
 (more to come)
 
-created by Tim T.Y. Lin on 2013-08-15
+created by Tim T.Y. Lin on 2013-08-15  
 Copyright (c) 2013 SLIM. All rights reserved.
