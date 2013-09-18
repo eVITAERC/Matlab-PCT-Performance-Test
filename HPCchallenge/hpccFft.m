@@ -70,13 +70,17 @@ spmd
 end
 
 perf = min([perf{:}]);
+t = min([t{;}]);
 err = err{1};
 
 if err > 1
     error('Failed the HPC FFT Benchmark');
 end
 
-fprintf('Data size: %f GB\nPerformance: %f GFlops\nErr: %f\n', 32*m/(1024^3), perf, err);
+problemSize = 32*m/(1024^3);
+fprintf('Data size: %f GB\nPerformance: %f GFlops\nErr: %f\n', problemSize, perf, err);
+
+
 
 % -------------------------------------------------------------------------
 % Trivial implementation of the inverse distributed FFT based 
