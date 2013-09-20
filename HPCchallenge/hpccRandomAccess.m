@@ -1,4 +1,4 @@
-function hpccRandomAccess( m )
+function report = hpccRandomAccess( m )
 %HPCCRANDOMACCESS An implementation of the HPCC Global RandomAccess benchmark
 %
 %  hpccRandomAccess(m) creates a real vector of length m, partitoned across
@@ -64,7 +64,9 @@ spmd
     % Call the algorithm. Return the time it takes and the output table
     [t, T] = iDoIt( m, b, nu );
 end
-perf = m / t{1} / 1e9;
+t = t{1};
+perf = m / t / 1e9;
+problemSize = 8*m/(1024^3);
 
 % Verification. Run the algorithm again. Should get original data
 spmd
@@ -77,7 +79,14 @@ if err{1} ~= 0
 end
 
 fprintf( 'Data size: %f GB\nPerformance: %f GUPS\nErr: %f\n', ...
-         8*m/(1024^3), perf, err{1});
+         problemSize, perf, err{1});
+
+report = matlabPCTBenchReport('hpccRandomAccess', t, ...
+                             'problemSize', problemSize, ...
+                             'problemSizeUnit', 'GB', ...
+                             'performance', perf, ...
+                             'performanceUnit', 'GUPS');
+
 
 end
 

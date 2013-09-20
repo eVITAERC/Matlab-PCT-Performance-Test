@@ -1,4 +1,4 @@
-function hpccLinpack( m )
+function report = hpccLinpack( m )
 %HPCCLINPACK An implementation of the HPCC Global HPL benchmark
 %
 %  hpccLinpack(m) creates a random codistributed real matrix A of size 
@@ -66,7 +66,13 @@ spmd
     end
 end
 % Performance in gigaflops
-perf = (2/3*m^3 + 3/2*m^2)/max([t{:}])/1.e9;
-
-fprintf('Data size: %f GB\nPerformance: %f GFlops\n', 8*m^2/(1024^3), perf);
+t = max([t{:}]);
+perf = (2/3*m^3 + 3/2*m^2)/t/1.e9;
+dataSize = 8*m^2/(1024^3);
+fprintf('Data size: %f GB\nPerformance: %f GFlops\n', dataSize, perf);
+report = matlabPCTBenchReport('hpccLinpack', t, ...
+                              'problemSize', dataSize, ...
+                              'problemSizeUnit', 'GB', ...
+                              'performance', perf, ...
+                              'performanceUnit', 'GFlops');
 

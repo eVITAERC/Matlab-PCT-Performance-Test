@@ -1,4 +1,4 @@
-function hpccPtrans( m )
+function report = hpccPtrans( m )
 %HPCCPTRANS An implementation of the HPCC Global PTRANS benchmark
 %
 %  hpccPtrans(m) creates two random codistributed real matrix A and B of size
@@ -47,7 +47,14 @@ spmd
 end
 
 % Performance in effective transfer rate of gigabytes/s
-perf = (8*(m^2))/max([t{:}])/1.e9;
+t = max([t{:}]);
+perf = (8*(m^2))/t/1.e9;
+problemSize = 8*m^2/(1024^3);
 
-fprintf('Data size: %f GB\nPerformance: %f GB/s\n', 8*m^2/(1024^3), perf);
+fprintf('Data size: %f GB\nPerformance: %f GB/s\n', problemSize, perf);
+report = matlabPCTBenchReport('hpccPtrans', t, ...
+                              'problemSize', problemSize, ...
+                              'problemSizeUnit', 'GB', ...
+                              'performance', perf, ...
+                              'performanceUnit', 'GB/s');
 

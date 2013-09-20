@@ -1,4 +1,4 @@
-function hpccFft( m )
+function report = hpccFft( m )
 %HPCCFFT An implementation of the HPCC Global FFT benchmark
 %
 % hpccFft(m) creates a random complex codistributed array of length m and 
@@ -70,7 +70,7 @@ spmd
 end
 
 perf = min([perf{:}]);
-t = min([t{;}]);
+t = min([t{:}]);
 err = err{1};
 
 if err > 1
@@ -79,7 +79,11 @@ end
 
 problemSize = 32*m/(1024^3);
 fprintf('Data size: %f GB\nPerformance: %f GFlops\nErr: %f\n', problemSize, perf, err);
-
+report = matlabPCTBenchReport('hpccFft', t, ...
+                              'problemSize', problemSize, ...
+                              'problemSizeUnit', 'GB', ...
+                              'performance', perf, ...
+                              'performanceUnit', 'GFlops');
 
 
 % -------------------------------------------------------------------------

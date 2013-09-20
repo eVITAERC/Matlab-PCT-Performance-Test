@@ -1,4 +1,4 @@
-function hpccStream( m )
+function report = hpccStream( m )
 %HPCCSTREAM An implementation of the HPCC EP STREAM (Triad) benchmark
 %
 %  hpccStream(m) computes a = b + c*k for random vectors b & c of length m
@@ -64,7 +64,15 @@ end
 % 24 bytes the data transfer for each element in the vector, made from
 % the reading of b and c and assignment to a, alpha is assumed to already
 % be in some cache.
-perf = 24*m/mean([t{:}])/1.e9;
+t = mean([t{:}]);
+perf = 24*m/t/1.e9;
+problemSize = 24*m/(1024^3);
 
-fprintf('Data size: %f GB\nPerformance: %f GB/s\n', 24*m/(1024^3), perf);
+fprintf('Data size: %f GB\nPerformance: %f GB/s\n', problemSize, perf);
+report = matlabPCTBenchReport('hpccStream', t, ...
+                             'problemSize', problemSize, ...
+                             'problemSizeUnit', 'GB', ...
+                             'performance', perf, ...
+                             'performanceUnit', 'GB/s');
+
 
