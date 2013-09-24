@@ -1,17 +1,19 @@
-function bench_results = runAll(save_filename,num_workers,memoryPerWorker_inGB,numNodes,numProcPerNode,remarks)
+function bench_results = runAll(save_filename,numNodes,numProcPerNode,memoryPerWorker_inGB,remarks)
 %   RUNALL   Runs all the MATLAB PCT implementations of the pSPOT benchmarks
-%       [bench_results] = runAll(save_filename,num_workers,memoryPerWorker_inGB, {,numNodes,numProcPerNode,remarks})
+%       [bench_results] = runAll(save_filename,numNodes,numProcPerNode,memoryPerWorker_inGB {,remarks})
 %
 %   # INPUTS
 %   save_filename           results will be saved to the file `{save_filename}.json` if not an empty string
-%   num_workers             a integer specifying the number of PCT workers to utilize
+%   numNodes                an integer specifying the number of nodes allocated for this benchmark
 %                           (default: 1)
+%   numProcPerNode          an integer specifying the number of processors per node allocated for this 
+%                           benchmark (default: 1)
 %   memoryPerWorker_inGB    set memory utilization per worker, in GB (1024^3 Bytes)
 %                           (default: 0.5)
-%   numNodes(int), numProcPerNode(int), remarks(string) are OPTIONAL and for record-keeping only, will be put into the record struct, see `matlabPCTBenchReport.m`
+%   remarks                 OPTIONAL string will be stored in the benchmark results. Useful for comments.
 %   
 %   # OUTPUTS
-%   BENCH_RESULTS   a cell-array of structs representing finished benchmark results for each benchmark
+%   BENCH_RESULTS           a cell-array of structs representing finished benchmark results for each benchmark
 %                   
 %   
 %   Created by Tim Lin on 2013-09-12.
@@ -22,17 +24,14 @@ run setupPath.m
 %% === Initialize
 
 % defaults
-if not(exist('num_workers','var'))
-    num_workers = 1;
-end
-if not(exist('memoryPerWorker_inGB','var'))
-    memoryPerWorker_inGB = 0.5;
-end
 if not(exist('numNodes','var'))
     numNodes = [];
 end
 if not(exist('numProcPerNode','var'))
     numProcPerNode = [];
+end
+if not(exist('memoryPerWorker_inGB','var'))
+    memoryPerWorker_inGB = 0.5;
 end
 if not(exist('remarks','var'))
     remarks = '';
@@ -44,11 +43,11 @@ currDir = pwd();
 
 try
     cd ./HPCchallenge
-    bench_results_HPCC = runAll(num_workers,memoryPerWorker_inGB,'all',numNodes,numProcPerNode,remarks);
+    bench_results_HPCC = runAll(numNodes,numProcPerNode,memoryPerWorker_inGB,'all',remarks);
     cd(currDir)
 
     cd ./pSPOT
-    bench_results_pSPOT = runAll(num_workers,memoryPerWorker_inGB,'all',numNodes,numProcPerNode,remarks);
+    bench_results_pSPOT = runAll(numNodes,numProcPerNode,memoryPerWorker_inGB,'all',remarks);
     cd(currDir)
 catch ME
     cd(currDir)

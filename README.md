@@ -31,17 +31,30 @@ In addition, the user needs to provision a working `matlabpool` instance before 
 
 #### Usage example
 
-Assuming that you want to use 6 nodes, each allowing 4 processes, for a total of 24 workers. For each process you want to use a maximum of 16 GB of memory available on the node (perhaps a little less than that, say 15 GB, for safety against burst access). In addition, you have a Matlab PCT profile called `CLUSTERPROFILE_6NODE_4PPN` that provisions these resources for `matlabpool`, then the following commands will run the complete benchmark suite (make sure you are in main directory, **not** in any of the subdirectories):
+The `runAll.m` function is declared as:
+
+    bench_results = runAll(save_filename,numNodes,numProcPerNode,memoryPerWorker_inGB {,remarks})
+
+Assuming that you want to use 8 nodes with 4 processes/workers each, for a total of 32 workers. For of the process/workers you want to use a maximum of 16 GB of memory (we'll use a bit a little less than that, perhaps 15 GB, for safety against burst overhead usage), which totals 64 GB of memory per node. In addition, you have a Matlab PCT profile called `CLUSTERPROFILE_8NODE_4PPN` that provisions these resources for a `matlabpool` environment, then the following commands will run the complete benchmark suite (make sure you are in main directory, **not** in any of the subdirectories):
     
-    >> matlabpool CLUSTERPROFILE_6NODE_4PPN 24
-    >> runAll('benchmarkResult_6node_4ppn', 24, 15, 6, 4, 'this is a demo run')
+    >> matlabpool CLUSTERPROFILE_8NODE_4PPN 24
+    >> runAll('benchmarkResult_8node_4ppn', 8, 4, 15, 'this is a demo run')
+    >> matlabpool close
 
-The `runAll()` function will return a cell-array of benchmark results, as well as write them in JSON format to a file called `benchmarkResult_6node_4ppn.json`. The last three arguments are simply for record-keeping: the function itself does not know how many nodes are used and how many processes live on each. The last argument is a string that is stored along with the rest of the benchmark numbers (in the `remark` field) and is useful for comments.
+The `runAll()` function will return a cell-array of benchmark results, as well as write them in JSON format to a file called `benchmarkResult_8node_4ppn.json`. The last argument is an optional string that is stored along with the rest of the benchmark numbers (in the `remark` field) and is useful for comments.
 
-For reference, `runAll.m` is declared as:
+It's important that your Matlab PCT profile allocates the right number of nodes and processors per node. The `matlabpool` environment, by construction, only have knowledge of the number of total workers. It knows nothing about how the workers are distributed across different nodes. The `runAll()` function will simply calculate the total number of workers available by multiplying `numNodes` with `numProcPerNode`, and give their product to the individual benchmarks (as well as record `numNodes` and `numProcPerNode` in the benchmark results). It will *not* check that the specified number of nodes and ppn is actually allocated correctly by your profile.
 
-    bench_results = runAll(save_filename,num_workers,memoryPerWorker_inGB, {,numNodes,numProcPerNode,remarks})
+**IMPORTANT**: Due to limitations in the implementation of some of the benchmarks in `HPCchallenge`, the total number of workers needs be a power of 2.
 
+#### Recovery from errors or interrupts
+
+Some of the benchmarks will render an existing `matlabpool` environment unusable if error occurred or if interrupted (with, e.g., `ctrl-c`). Anytime that a benchmark suite cannot complete successfully, make sure that you always destroy the existing `matlabpool` environment and return to the root directory by executing
+    
+    >> matlabpool close force
+    >> cd HPCBENCH_DIR
+
+where `HPCBENCH_DIR` is the base directory of this program, before attempting another benchmark run.
 
 ### Result report
 
