@@ -8,8 +8,8 @@ function report = hpccFft( m )
 %  the inverse discrete fourier transform on the result (in parallel) to 
 %  ensure that the error on the computation is within acceptable bounds.
 %
-%  The number of labs in the pool must be a power of 2; and m must be a 
-%  power of 2 equal to or greater than 2^numlabs.
+%  The number of labs in the pool should be a power of 2; and m must be a 
+%  power of 2
 %
 %  If you do not provide a value for m, the default value is that returned
 %  from hpccGetProblemSize('fft'), which assumes that each process in the
@@ -49,106 +49,34 @@ end
 % Input vector MUST be a power of 2 in size
 assert(m == 2^floor(log2(m)), 'hpccFft requires an exact power of 2 size for its input vector size');
 spmd
-    % Input vector MUST be larger than 2^numlabs and numlabs MUST be a power of 2
-    assert(log2(m) >= numlabs, 'hpccFft requires an input vector size >= 2^numlabs');
+    % numlabs MUST be a power of 2
     assert(numlabs == 2^floor(log2(numlabs)), 'hpccFft requires an exact power of 2 number of labs');
     
     % Create complex 1xm random vector
-    x = codistributed.rand(1, m) + codistributed.rand(1, m)*1i;
-     
+    x = codistributed.rand(m,1) + codistributed.rand(m,1)*1i;
+    
     % Time the forward FFT
     tic
-    y = iDistributedFft(x);
+    y = fft(x);
     t = toc;
-        
-    % Performance in gigaflops
-    perf = 5*m*log2(m)/t/1.e9;
-    
-    % Compute error from the inverse FFT    
-    z = iDistributedIfft(y);
-    err = norm(x-z,inf)/(16*log2(m)*eps);
 end
 
-perf = min([perf{:}]);
-t = min([t{:}]);
-err = err{1};
+% Performance in gigaflops
+t = max([t{:}]);
+perf = 5*m*log2(m)/t/1.e9;
+problemSize = 32*m/(1024^3);
 
-if err > 1
+% Compute error from the inverse FFT    
+z = (1/length(y))*conj(fft(conj(y)));
+relErr = gather(norm(x-z,inf)/(16*log2(m)*eps));
+
+if relErr > 1
     error('Failed the HPC FFT Benchmark');
 end
 
-problemSize = 32*m/(1024^3);
-fprintf('Data size: %f GB\nPerformance: %f GFlops\nErr: %f\n', problemSize, perf, err);
+fprintf('Data size: %f GB\nPerformance: %f GFlops\nRelativeErr: %f\n', problemSize, perf, relErr);
 report = matlabPCTBenchReport('hpccFft', t, ...
                               'problemSize', problemSize, ...
                               'problemSizeUnit', 'GB', ...
                               'performance', perf, ...
                               'performanceUnit', 'GFlops');
-
-
-% -------------------------------------------------------------------------
-% Trivial implementation of the inverse distributed FFT based 
-% -------------------------------------------------------------------------
-function z = iDistributedIfft(y)
-% IFFT  Inverse FFT for distribued arrays
-z = (1/length(y))*conj(iDistributedFft(conj(y)));
-
-% -------------------------------------------------------------------------
-% An implementation of a distributed FFT based on the Cooley-Tukey FFT
-% algorithm (http://en.wikipedia.org/wiki/Cooley-Tukey_FFT_algorithm)
-% -------------------------------------------------------------------------
-function x = iDistributedFft(x)
-% Remember row or column size
-s = size(x);
-assert(s(1) == 1 || s(2) == 1, 'Must have a vector input');
-
-% Reshape to matrix with numlabs columns
-n = prod(s);
-M = numlabs;
-N = n/M;
-x = iReshape(x, N, M);
-
-% Redistribute to do small FFT's on each lab
-x = redistribute(x, codistributor1d(1));
-
-% Local 1-D FFT
-xloc = fft(getLocalPart(x), [], 2);
-
-% Compute local twiddle factors
-omega = exp(-2*pi*1i* (getLocalPart(codistributed.colon(0,N-1))')/n);
-t = repmat(omega, 1, M);
-t(:, 1) = 1;
-t = cumprod(t, 2);
-
-% Multiply by the local twiddle factors
-x = codistributed.build(xloc .* t, getCodistributor(x));
-
-% Redistribute to do second set of small FFT's on each lab
-x = redistribute(x, codistributor1d(2));
-
-% Local 1-D FFTs
-xloc = fft(getLocalPart(x), [], 1);
-% Recreate distributed array 
-x = codistributed.build(xloc,  getCodistributor(x));
-
-% Return distributed array row or column vector
-x = redistribute(x.', codistributor1d(2));
-x = iReshape(x, s(1), s(2));
-
-% -------------------------------------------------------------------------
-% A function that reshapes codistributed arrays without any communication.
-% This can ONLY be done because we know that the partitions involved fit
-% exactly onto the same machine. This fit is a consequence of the specific
-% restrictions on the size of the input vector and the number of labs 
-% involved in the computation.
-% -------------------------------------------------------------------------
-function B = iReshape(A, r, c)
-% Check the inputs are correct
-assert(prod(size(A)) == r*c, 'Cannot reshape'); %#ok<PSIZE>
-assert(rem(c, numlabs) == 0, 'Cannot reshape');
-% Reshape the local part correctly
-L = reshape(getLocalPart(A), r, c/numlabs);
-% Create the correct codistributor for the output
-cdist = codistributor1d(2, zeros(1, numlabs) + c/numlabs, [r, c]);
-% Make the output distributed array without communication
-B = codistributed.build(L, cdist, 'noCommunication');
