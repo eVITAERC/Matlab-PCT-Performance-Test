@@ -71,7 +71,8 @@ problemSize = 8*m/(1024^3);
 % Verification. Run the algorithm again. Should get original data
 spmd
     [~, T] = iDoIt( m, b, nu, T );
-    err = gplus( norm( double(T) - double( iGenerateTable(m) ), Inf ) );
+    T = T - iGenerateTable(m);
+    err = gplus(max(abs(T)));
 end
 
 if err{1} ~= 0

@@ -13,7 +13,7 @@ end
 disp('running FourDimFFT...')
 
 % create a cube
-overhead_factor = 4; % memory usage redundancy factor
+overhead_factor = 3; % memory usage redundancy factor
 GB_to_byte = 1024^3;
 n = floor(nthroot((memoryPerWorker_inGB * GB_to_byte) / (overhead_factor * 8), 4));
 

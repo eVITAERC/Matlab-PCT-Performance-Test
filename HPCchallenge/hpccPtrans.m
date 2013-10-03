@@ -32,17 +32,24 @@ spmd
     % Create two distributed matrix in the default 1d distribution
     A = codistributed.randn(m, m);
     B = codistributed.randn(m, m);
-    C = codistributed.randn(m, m);
     
     % Time the mat-add
     tic
     A = A + B;
     t_madd = toc;
     
-    % Time the transpose and subtract the mat-add time
-    tic
-    A = transpose(A) + B;
-    t = toc;
+    % Do the transpose +c in a loop and get the median time
+    for k=1:5
+        % main run for timing
+        tic
+        A = transpose(A) + B;
+        t_runs(k) = toc;
+        % second run to flush original untransposed matrix from cache
+        A = transpose(A) + B;
+    end
+    t = median(t_runs);
+    
+    % remove matrix sum time (will also remove communication setup time bias)
     t = t - t_madd;
 end
 

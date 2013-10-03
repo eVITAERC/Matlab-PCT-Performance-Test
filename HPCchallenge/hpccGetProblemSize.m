@@ -48,22 +48,22 @@ switch lower(benchmark)
         % ScaLAPACK data
         %
         % Matrix size (8*N^2) > 1/2 system memory
-        N = fix(sqrt(totalMem / 2.5 / 8));
+        N = fix(sqrt(totalMem / 2.7 / 8));
 	case 'ptrans'
 		% Need to accomodate two random matrices plus 3x overhead for the transpose
 		% Matrix size (8*N^2) > 1/5 system memory
-		N = fix(sqrt(totalMem / 5.5 / 8));
+		N = fix(sqrt(totalMem / 5 / 8));
     case 'ra'
         % Table size (8*M bytes) > 1/4 of system memory
         N = fix(totalMem / 4 / 8);
     case 'fft'
-        % Vector in + vector out (32*M bytes) > 1/4 of system memory
-        N = fix(totalMem / 4 / 32);
+        % Vector in + vector out (32*M bytes) > 1/8 of system memory
+        N = fix(totalMem / 10 / 32);
         % Vector length must be a power of 2
         N = 2^(floor(log2(N)));
     case 'stream'
-        % two vectors in + vector out (24*M bytes) > 1/4 of system memory
-        N = fix(totalMem / 4 / 24);
+        % two vectors in + vector out (24*M bytes) > system memory
+        N = fix(totalMem / 1.2 / 24);
     otherwise
         error('Unknown benchmark');
 end

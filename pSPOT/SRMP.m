@@ -13,7 +13,7 @@ end
 disp('running SRMP...')
 
 % create a cube
-overhead_factor = 8; % memory usage redundancy factor
+overhead_factor = 1.5; % memory usage redundancy factor
 GB_to_byte = 1024^3;
 n = floor(nthroot((memoryPerWorker_inGB * GB_to_byte) / (2 * overhead_factor * 8), 3));
 

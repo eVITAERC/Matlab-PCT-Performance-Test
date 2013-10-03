@@ -19,7 +19,7 @@ function bench_results = runAll(save_filename,numNodes,numProcPerNode,memoryPerW
 %   Created by Tim Lin on 2013-09-12.
 %   Copyright (c) 2013 SLIM. All rights reserved.
 
-run setupPath.m
+run setupPath
 
 %% === Initialize
 
